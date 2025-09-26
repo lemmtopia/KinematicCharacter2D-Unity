@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class KinematicCharacter2D : MonoBehaviour
 {
@@ -19,10 +18,21 @@ public class KinematicCharacter2D : MonoBehaviour
     // My movement vector for this frame.
     private Vector2 motion;
 
+    // Coyote time
+    private float coyoteTime;
+
+    // Jump buffer
+    private float jumpBuffer;
+
     void Start()
     {
         // Getting my rb
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Update()
+    {
+        
     }
 
     void FixedUpdate()
@@ -61,6 +71,8 @@ public class KinematicCharacter2D : MonoBehaviour
         rb.MovePosition(myPos);
 
         UpdateStatusFlags(myPos);
+
+        HandleJumpingOutsideGround();
     }
 
     // Basically a Unity version og GMS2's place_meeting()
@@ -84,6 +96,9 @@ public class KinematicCharacter2D : MonoBehaviour
         // Checking if my feet are colliding
         if (CollideAt(myPos.x, myPos.y - (1f / 8f), solidMask))
         {
+            // Set coyote time
+            coyoteTime = stats.coyoteTimeMax;
+
             isGrounded = true;
             isFalling = false;
         }
@@ -100,6 +115,19 @@ public class KinematicCharacter2D : MonoBehaviour
             {
                 isFalling = false;
             }
+        }
+    }
+
+    private void HandleJumpingOutsideGround()
+    {
+        coyoteTime -= Time.deltaTime;
+        jumpBuffer -= Time.deltaTime;
+        if (jumpBuffer > 0 && coyoteTime > 0)
+        {
+            motion.y = stats.jumpHeight;
+
+            jumpBuffer = 0;
+            coyoteTime = 0;
         }
     }
 
@@ -136,7 +164,16 @@ public class KinematicCharacter2D : MonoBehaviour
     {
         if (isGrounded)
         {
+            // Jump
             motion.y = stats.jumpHeight;
+
+            jumpBuffer = 0;
+            coyoteTime = 0;
+        }
+        else
+        {
+            // Try to jump later
+            jumpBuffer = stats.jumpBufferMax;
         }
     }
 
