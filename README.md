@@ -24,7 +24,7 @@ A simple script that simulates platformer movement in Unity 2022.3 and newer.
 ## How do I use it?
 The collision code is GameMaker-style, so it should be used in a **Kinematic** Rigidbody2D. 
 
-## Step-by-step
+### Step-by-step
 1. Setup Rigidbody2D and BoxCollider2D
 2. Drag the KinematicCharacter2D script to a GameObject
 3. Create a KinematicCharacterStats2D scriptable object instance
