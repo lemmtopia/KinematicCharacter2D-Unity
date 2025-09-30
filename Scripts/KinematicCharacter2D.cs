@@ -13,21 +13,21 @@ public class KinematicCharacter2D : MonoBehaviour
     public bool isFacingRight;
 
     // Rigidbody2D - MUST BE KINEMATIC!!!
-    private Rigidbody2D rb;
+    private Rigidbody2D _rb;
 
     // My movement vector for this frame.
-    private Vector2 motion;
+    private Vector2 _motion;
 
     // Coyote time
-    private float coyoteTime;
+    private float _coyoteTime;
 
     // Jump buffer
-    private float jumpBuffer;
+    private float _jumpBuffer;
 
     void Start()
     {
         // Getting my rb
-        rb = GetComponent<Rigidbody2D>();
+        _rb = GetComponent<Rigidbody2D>();
     }
 
     private void Update()
@@ -38,37 +38,37 @@ public class KinematicCharacter2D : MonoBehaviour
     void FixedUpdate()
     {
         // My position before moving this frame
-        Vector2 myPos = rb.position;
+        Vector2 myPos = _rb.position;
 
         // Fall
-        motion.y -= stats.gravity * Time.deltaTime;
+        _motion.y -= stats.gravity * Time.deltaTime;
 
         // Horizontal collision
-        if (CollideAt(myPos.x + (motion.x * Time.deltaTime), myPos.y, solidMask))
+        if (CollideAt(myPos.x + (_motion.x * Time.deltaTime), myPos.y, solidMask))
         {
-            while (!CollideAt(myPos.x + (Mathf.Sign(motion.x) * Time.deltaTime), myPos.y, solidMask))
+            while (!CollideAt(myPos.x + (Mathf.Sign(_motion.x) * Time.deltaTime), myPos.y, solidMask))
             {
-                myPos.x += (Mathf.Sign(motion.x) * Time.deltaTime);
+                myPos.x += (Mathf.Sign(_motion.x) * Time.deltaTime);
             }
 
-            motion.x = 0;
+            _motion.x = 0;
         }
-        myPos.x += motion.x * Time.deltaTime;
+        myPos.x += _motion.x * Time.deltaTime;
 
         // Vertical Collision
-        if (CollideAt(myPos.x, myPos.y + (motion.y * Time.deltaTime), solidMask))
+        if (CollideAt(myPos.x, myPos.y + (_motion.y * Time.deltaTime), solidMask))
         {
-            while (!CollideAt(myPos.x, myPos.y + (Mathf.Sign(motion.y) * Time.deltaTime), solidMask))
+            while (!CollideAt(myPos.x, myPos.y + (Mathf.Sign(_motion.y) * Time.deltaTime), solidMask))
             {
-                myPos.y += (Mathf.Sign(motion.y) * Time.deltaTime);
+                myPos.y += (Mathf.Sign(_motion.y) * Time.deltaTime);
             }
 
-            motion.y = 0;
+            _motion.y = 0;
         }
-        myPos.y += motion.y * Time.deltaTime;
+        myPos.y += _motion.y * Time.deltaTime;
 
         // Update my position based on myPos
-        rb.MovePosition(myPos);
+        _rb.MovePosition(myPos);
 
         UpdateStatusFlags(myPos);
 
@@ -87,17 +87,17 @@ public class KinematicCharacter2D : MonoBehaviour
     private void UpdateStatusFlags(Vector2 myPos)
     {
         // If I'm moving
-        if (motion.x != 0)
+        if (_motion.x != 0)
         {
             // Change isFacingRight
-            isFacingRight = (motion.x > 0) ? true : false;
+            isFacingRight = (_motion.x > 0) ? true : false;
         }
 
         // Checking if my feet are colliding
         if (CollideAt(myPos.x, myPos.y - (1f / 8f), solidMask))
         {
             // Set coyote time
-            coyoteTime = stats.coyoteTimeMax;
+            _coyoteTime = stats.coyoteTimeMax;
 
             isGrounded = true;
             isFalling = false;
@@ -107,7 +107,7 @@ public class KinematicCharacter2D : MonoBehaviour
             isGrounded = false;     // Not on ground
 
             // Check if I'm falling
-            if (motion.y < 0)
+            if (_motion.y < 0)
             {
                 isFalling = true;
             }
@@ -120,14 +120,14 @@ public class KinematicCharacter2D : MonoBehaviour
 
     private void HandleJumpingOutsideGround()
     {
-        coyoteTime -= Time.deltaTime;
-        jumpBuffer -= Time.deltaTime;
-        if (jumpBuffer > 0 && coyoteTime > 0)
+        _coyoteTime -= Time.deltaTime;
+        _jumpBuffer -= Time.deltaTime;
+        if (_jumpBuffer > 0 && _coyoteTime > 0)
         {
-            motion.y = stats.jumpHeight;
+            _motion.y = stats.jumpHeight;
 
-            jumpBuffer = 0;
-            coyoteTime = 0;
+            _jumpBuffer = 0;
+            _coyoteTime = 0;
         }
     }
 
@@ -136,11 +136,16 @@ public class KinematicCharacter2D : MonoBehaviour
         // Accelerate
         if (isGrounded)
         {
-            motion.x += move * stats.groundAcceleration * Time.deltaTime;
+            _motion.x += move * stats.groundAcceleration * Time.deltaTime;
         }
         else
         {
-            motion.x += move * stats.airAcceleration * Time.deltaTime;
+            if (!stats.hasAirControl)
+            {
+                return;
+            }
+
+            _motion.x += move * stats.airAcceleration * Time.deltaTime;
         }
 
         // Decelerate
@@ -148,16 +153,16 @@ public class KinematicCharacter2D : MonoBehaviour
         {
             if (isGrounded)
             {
-                motion.x = Mathf.Lerp(motion.x, 0, stats.groundDeceleration * Time.deltaTime);
+                _motion.x = Mathf.Lerp(_motion.x, 0, stats.groundDeceleration * Time.deltaTime);
             }
             else
             {
-                motion.x = Mathf.Lerp(motion.x, 0, stats.airDeceleration * Time.deltaTime);
+                _motion.x = Mathf.Lerp(_motion.x, 0, stats.airDeceleration * Time.deltaTime);
             }
         }
         
         // Limit our motion
-        motion.x = Mathf.Clamp(motion.x, -stats.moveSpeed, stats.moveSpeed);
+        _motion.x = Mathf.Clamp(_motion.x, -stats.moveSpeed, stats.moveSpeed);
     }
 
     public void Jump()
@@ -165,23 +170,28 @@ public class KinematicCharacter2D : MonoBehaviour
         if (isGrounded)
         {
             // Jump
-            motion.y = stats.jumpHeight;
+            _motion.y = stats.jumpHeight;
 
-            jumpBuffer = 0;
-            coyoteTime = 0;
+            _jumpBuffer = 0;
+            _coyoteTime = 0;
         }
         else
         {
             // Try to jump later
-            jumpBuffer = stats.jumpBufferMax;
+            _jumpBuffer = stats.jumpBufferMax;
         }
     }
 
     public void JumpCancel()
     {
-        if (motion.y > stats.jumpHeight / stats.jumpCancelDivisor)
+        if (stats.jumpCancelDivisor <= 1)
         {
-            motion.y /= stats.jumpCancelDivisor;
+            return;
+        }
+
+        if (_motion.y > stats.jumpHeight / stats.jumpCancelDivisor)
+        {
+            _motion.y /= stats.jumpCancelDivisor;
         }
     }
 }

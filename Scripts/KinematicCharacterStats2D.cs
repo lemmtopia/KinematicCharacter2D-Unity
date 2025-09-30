@@ -14,4 +14,5 @@ public class KinematicCharacterStats2D : ScriptableObject
     public float jumpCancelDivisor = 1;
     public float coyoteTimeMax = 0.08f;
     public float jumpBufferMax = 0.06f;
+    public bool hasAirControl;
 }

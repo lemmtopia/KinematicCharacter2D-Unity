@@ -9,14 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de8449eeb203dba4b842882880698cd9, type: 3}
+  m_Script: {fileID: 11500000, guid: 0f81cde4fb5c59b4a809160bb1a9601e, type: 3}
   m_Name: PlayerCharacterStats
   m_EditorClassIdentifier: 
-  moveSpeed: 7
+  moveSpeed: 4
   groundAcceleration: 90
-  groundDeceleration: 45
-  airAcceleration: 75
-  airDeceleration: 12
-  gravity: 30
-  jumpHeight: 12
-  jumpCancelDivisor: 2
+  groundDeceleration: 80
+  airAcceleration: 60
+  airDeceleration: 15
+  gravity: 20
+  jumpHeight: 8
+  jumpCancelDivisor: 1
+  coyoteTimeMax: 0.08
+  jumpBufferMax: 0.06
+  hasAirControl: 0
