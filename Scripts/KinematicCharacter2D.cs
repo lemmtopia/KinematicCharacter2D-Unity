@@ -11,6 +11,7 @@ public class KinematicCharacter2D : MonoBehaviour
     public bool isGrounded;
     public bool isFalling;
     public bool isFacingRight;
+    public bool hasLandedThisFrame;
 
     // Rigidbody2D - MUST BE KINEMATIC!!!
     private Rigidbody2D _rb;
@@ -86,6 +87,8 @@ public class KinematicCharacter2D : MonoBehaviour
     // Updates the public instance status variables (isFalling, isGrounded etc.)
     private void UpdateStatusFlags(Vector2 myPos)
     {
+        hasLandedThisFrame = false;
+
         // If I'm moving
         if (_motion.x != 0)
         {
@@ -98,6 +101,11 @@ public class KinematicCharacter2D : MonoBehaviour
         {
             // Set coyote time
             _coyoteTime = stats.coyoteTimeMax;
+
+            if (!isGrounded)
+			{
+                hasLandedThisFrame = true;
+			}
 
             isGrounded = true;
             isFalling = false;
